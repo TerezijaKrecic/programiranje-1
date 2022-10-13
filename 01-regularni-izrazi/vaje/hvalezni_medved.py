@@ -1,3 +1,5 @@
+import re
+
 ###############################################################################
 # Hvaležni medved
 #
@@ -26,6 +28,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'izdere', 'debel', 'oddide', 'začudeno'}
 ###############################################################################
 
+def find_words(niz, vzorec):
+    return(set(re.findall(r'\b\w*'+vzorec+r'\w*\b', niz)))
+
+print(find_words(test_text, 'de'))
 
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
@@ -35,6 +41,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'zibala', 'zibel', 'zibelko'}
 ###############################################################################
 
+def find_prefix(niz, vzorec):
+    return(set(re.findall(r'\b'+vzorec+r'\w*\b', niz)))
+
+print(find_prefix(test_text, 'zi'))
 
 ###############################################################################
 # 3) Sestavite funkcijo [find_suffix], ki vrne množico vseh besed, ki se
@@ -44,6 +54,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'zibala', 'razveselila', 'prestrašila', 'šivala', 'opazila', 'tla'}
 ###############################################################################
 
+def find_suffix(niz, vzorec):
+    return(set(re.findall(r'\b\w*'+vzorec+r'\b', niz)))
+
+print(find_suffix(test_text, 'la'))
 
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
@@ -52,3 +66,9 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> double_letters('A volunteer is worth twenty pressed men.')
 # {'volunteer', 'pressed'}
 ###############################################################################
+
+def double_letters(niz):
+    seznam = re.findall(r'(\b\w*(\w)\2\w*\b)', niz) #python vrne le capturing grupo, ne cele besede, zato naredimo dve grupi
+    return(set(m[0] for m in seznam))
+
+print(double_letters('A volunteer is worth twenty pressed men.'))
