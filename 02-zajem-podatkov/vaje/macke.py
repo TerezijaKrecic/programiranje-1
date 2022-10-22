@@ -199,11 +199,11 @@ def write_cat_ads_to_csv(ads, directory, filename):
 ###############################################################################
 # Samoiniciativa - shranimo še v .json datoteko
 ###############################################################################
-def write_json(slovar, directory, filename):
+def write_json(seznam_slovarjev, directory, filename):
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, filename)
     with open(path, 'w', encoding='utf-8') as json_file:
-        json.dump(slovar, json_file, ensure_ascii=False, indent=4)
+        json.dump(seznam_slovarjev, json_file, ensure_ascii=False, indent=4)
     return None
 
 # Celoten program poženemo v glavni funkciji
