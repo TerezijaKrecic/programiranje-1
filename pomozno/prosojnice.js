@@ -26,7 +26,7 @@ remarkSrc.onload = function () {
     highlightLanguage: 'ocaml',
     highlightStyle: 'github',
     countIncrementalSlides: false,
-    ratio: '16:9',
+    ratio: '16:9'
   });          
 };
 document.head.appendChild(remarkSrc);

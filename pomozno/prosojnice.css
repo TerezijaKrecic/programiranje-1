@@ -66,16 +66,22 @@ table {
     color: blue;
 }
 
-.good-example pre code {
+.good-example {
     background-color: #ddf !important;
 }
 
-.bad-example code {
+.bad-example {
     background-color: #fdd !important;
 }
 
 .terminal code {
     border-radius: 10px;
+    background-color: #222 !important;
+}
+
+.terminal code * {
+    color: white !important;
+    font-weight: normal;
 }
 
 .handwritten h1 {
@@ -88,7 +94,7 @@ table {
     height: 45%;
 }
 
-.mini code {
+.mini {
     font-size: 0.9em;
 }
 
