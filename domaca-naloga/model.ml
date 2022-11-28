@@ -1,6 +1,6 @@
 (* Pomožni tip, ki predstavlja mrežo *)
 
-type 'a grid = 'a Array.t Array.t
+type 'a grid = ('a Array.t) Array.t
 
 (* Funkcije za prikaz mreže.
    Te definiramo najprej, da si lahko z njimi pomagamo pri iskanju napak. *)
