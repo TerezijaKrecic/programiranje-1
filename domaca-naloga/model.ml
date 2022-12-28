@@ -6,6 +6,7 @@ type 'a grid = ('a Array.t) Array.t
    Te definiramo najprej, da si lahko z njimi pomagamo pri iskanju napak. *)
 
 (* Razbije seznam [lst] v seznam seznamov dolžine [size] *)
+(* PRIMER: chunkify 2 [1;2;3;4;5] -> [[1; 2]; [3; 4]; [5]] *)
 let chunkify size lst =
   let rec aux chunk chunks n lst =
     match (n, lst) with
@@ -18,9 +19,11 @@ let chunkify size lst =
 
 let string_of_list string_of_element sep lst =
   lst |> List.map string_of_element |> String.concat sep
+(* PRIMER: string_of_list Int.to_string "-" [1;2;3] -> "1-2-3" *)
 
 let string_of_nested_list string_of_element inner_sep outer_sep =
   string_of_list (string_of_list string_of_element inner_sep) outer_sep
+(* string_of_nested_list Int.to_string "-" "|" [[1;2];[3;4;5]] -> "1-2|3-4-5" *)
 
 let string_of_row string_of_cell row =
   let string_of_cells =
@@ -28,8 +31,10 @@ let string_of_row string_of_cell row =
     |> string_of_nested_list string_of_cell "" "│"
   in
   "┃" ^ string_of_cells ^ "┃\n"
+(* string_of_row Int.to_string [|1;2;3;4;5;6;7;8;9|] -> "┃123│456│789┃\n" *)
 
 let print_grid string_of_cell grid =
+  (* grid je oblike Array of Arrays (9x Array po 9 elementov), spravi v obliko 3*3 mreže, kot je v mapi s primeri sudokujev *)
   let ln = "───" in
   let big = "━━━" in
   let divider = "┠" ^ ln ^ "┼" ^ ln ^ "┼" ^ ln ^ "┨\n" in
@@ -41,24 +46,45 @@ let print_grid string_of_cell grid =
   Printf.printf "%s" row_blocks;
   Printf.printf "┗%s┷%s┷%s┛\n" big big big
 
+
 (* Funkcije za dostopanje do elementov mreže *)
 
-let get_row (grid : 'a grid) (row_ind : int) = failwith "TODO"
+let get_row (grid : 'a grid) (row_ind : int) = grid.(row_ind)
+(* iz grida prebere (int+1)-ti Array oz. vrstico *)
 
-let rows grid = failwith "TODO"
+let rows grid = List.init 9 (get_row grid)
+(* vrne seznam z Array-i/vrsticami *)
 
 let get_column (grid : 'a grid) (col_ind : int) =
   Array.init 9 (fun row_ind -> grid.(row_ind).(col_ind))
+(* vrne Array z elementi v tem stolpcu *)
 
 let columns grid = List.init 9 (get_column grid)
+(* vrne seznam z Array-i/stolpci *)
 
-let get_box (grid : 'a grid) (box_ind : int) = failwith "TODO"
+let get_box (grid : 'a grid) (box_ind : int) =
+  let tretjina box_ind mod 3 in
+  (* spr. tretjina označuje, katera skupina treh stolpcev: 0 -> prvi trije; 1 -> drugi trije; 2 -> tretji trije:
+     0 -> 0,1,2
+     1 -> 3,4,5
+     2 -> 6,7,8 *)
+  let seznam_stolpcev = Array.init 3 (fun i -> get_column grid (tretjina*3 + i)) in
+  (* to vrne Array z Arrayi pravih stolpcev, od katerih moramo samo še vzeti prave elemente ven *)
+  let vzemi_tri_elemente arr ind = Array.init 3 (fun i -> arr.(ind + i)) in
+  (* sprejme array in prvi indeks, kjer vzame le prve tri elemente od vključno indeksa dalje*)
+  if box_ind < 3 then indeks = 0
+  else if box_ind < 6 then indeks = 3
+  else indeks = 6 in
+  Array.concat List.init 3 (fun i -> vzemi_tri_elemente seznam_stolpcev.(i) indeks)
+  (* dobimo Array z 9-imi elementi škatle - prve, druge in tretje vrstice*)
 
-let boxes grid = failwith "TODO"
+let boxes grid = List.init 9 (get_box grid)
+(* vrne seznam z Arrayi posameznih škatel *)
+
 
 (* Funkcije za ustvarjanje novih mrež *)
 
-let map_grid (f : 'a -> 'b) (grid : 'a grid) : 'b grid = failwith "TODO"
+let map_grid (f : 'a -> 'b) (grid : 'a grid) : 'b grid = Array.init 9 (Array.map f (get_row grid))
 
 let copy_grid (grid : 'a grid) : 'a grid = map_grid (fun x -> x) grid
 
