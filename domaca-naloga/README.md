@@ -80,9 +80,9 @@ V ukazni vrstici poženite:
 
 To ustvari datoteko `sudoku.exe`, ki ob klicu
 
-    ./sudoku.exe sudokuji/primer-1.sdk
+    ./sudoku.exe sudokuji/obicajni-1.sdk
 
-reši sudoku v datoteki `primer-1.sdk`
+reši sudoku v datoteki `obicajni-1.sdk`
 
 V mapi `sudokuji` najdete testne datoteke, ki vsebujejo primere običajnih sudokujev. Program lahko na vseh sudokujih poženete kot
 

@@ -63,7 +63,7 @@ let columns grid = List.init 9 (get_column grid)
 (* vrne seznam z Array-i/stolpci *)
 
 let get_box (grid : 'a grid) (box_ind : int) =
-  let tretjina box_ind mod 3 in
+  let tretjina = box_ind mod 3 in
   (* spr. tretjina označuje, katera skupina treh stolpcev: 0 -> prvi trije; 1 -> drugi trije; 2 -> tretji trije:
      0 -> 0,1,2
      1 -> 3,4,5
@@ -72,10 +72,11 @@ let get_box (grid : 'a grid) (box_ind : int) =
   (* to vrne Array z Arrayi pravih stolpcev, od katerih moramo samo še vzeti prave elemente ven *)
   let vzemi_tri_elemente arr ind = Array.init 3 (fun i -> arr.(ind + i)) in
   (* sprejme array in prvi indeks, kjer vzame le prve tri elemente od vključno indeksa dalje*)
-  if box_ind < 3 then indeks = 0
-  else if box_ind < 6 then indeks = 3
-  else indeks = 6 in
-  Array.concat List.init 3 (fun i -> vzemi_tri_elemente seznam_stolpcev.(i) indeks)
+  let indeks = (if box_ind < 3 then 0
+    else if box_ind < 6 then 3
+    else 6)
+  in
+  Array.concat (List.init 3 (fun i -> vzemi_tri_elemente seznam_stolpcev.(i) indeks))
   (* dobimo Array z 9-imi elementi škatle - prve, druge in tretje vrstice*)
 
 let boxes grid = List.init 9 (get_box grid)
@@ -84,7 +85,7 @@ let boxes grid = List.init 9 (get_box grid)
 
 (* Funkcije za ustvarjanje novih mrež *)
 
-let map_grid (f : 'a -> 'b) (grid : 'a grid) : 'b grid = Array.init 9 (Array.map f (get_row grid))
+let map_grid (f : 'a -> 'b) (grid : 'a grid) : 'b grid = Array.init 9 (fun i -> Array.map f (get_row grid i))
 
 let copy_grid (grid : 'a grid) : 'a grid = map_grid (fun x -> x) grid
 
@@ -123,7 +124,7 @@ let grid_of_string cell_of_char str =
 
 type problem = { initial_grid : int option grid }
 
-let print_problem problem : unit = failwith "TODO"
+let print_problem problem : unit = print_grid Int.to_string problem
 
 let problem_of_string str =
   let cell_of_char = function
@@ -137,6 +138,6 @@ let problem_of_string str =
 
 type solution = int grid
 
-let print_solution solution = failwith "TODO"
+let print_solution solution = print_grid Int.to_string solution
 
-let is_valid_solution problem solution = failwith "TODO"
+let is_valid_solution problem solution = (* failwith "TODO" NAPIŠI pravilno kodo! *) true
