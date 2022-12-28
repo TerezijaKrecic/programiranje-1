@@ -1,6 +1,6 @@
 (* Pomožni tip, ki predstavlja mrežo *)
 
-type 'a grid = ('a Array.t) Array.t
+type 'a grid = 'a Array.t Array.t
 
 (* Funkcije za prikaz mreže.
    Te definiramo najprej, da si lahko z njimi pomagamo pri iskanju napak. *)
@@ -124,7 +124,11 @@ let grid_of_string cell_of_char str =
 
 type problem = { initial_grid : int option grid }
 
-let print_problem problem : unit = print_grid Int.to_string problem
+let int_of_intoption = function None -> " " | Some n -> Int.to_string n
+
+(* let print_problem problem : unit = Array.iter (fun vrstica -> ((Array.iter (fun x -> Printf.printf "%s" (int_of_intoption x)) vrstica); Printf.printf "\n")) (problem.initial_grid) *)
+(* to sprinta v 9 vrstic, ampak brez ogrodja, je grdo! *)
+let print_problem problem : unit = print_grid int_of_intoption problem.initial_grid
 
 let problem_of_string str =
   let cell_of_char = function
