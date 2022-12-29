@@ -5,8 +5,8 @@ type available = { loc : int * int; possible : int list }
 type state = {
   problem : Model.problem;
   current_grid : (int option) Model.grid;
-  current_row: int; (* current_row pove, da so vrstice nad njo že polne *)
-  current_column: int;
+  current_row: int; (* current_row pove, da so vrstice nad njo že polne; pride prav, da ne vsakič znova gledamo od vrha, kjer so vrstice že polne *)
+  current_column: int; (* pride prav, ko zamenjujemo None s kandidati in ko iščemo kandidate za naslednji None v isti vrstici, da ne gledamo od začetka vrstice *)
   current_element_option: int list (* možna števila za prvi zgornji levi manjkajoči element *)
   } 
 
@@ -42,6 +42,8 @@ let branch_state (state : state) : (state * state) option =
      v prvem predpostavi, da hipoteza velja, v drugem pa ravno obratno.
      Če bo vaš algoritem najprej poizkusil prvo možnost, vam morda pri drugi
      za začetek ni treba zapravljati preveč časa, saj ne bo nujno prišla v poštev. *)
+
+  (* MOJA IDEJA: gremo po vrsticah od zgoraj navzdol in poiščimo prvo vrstico, ki vsebuje element None. Nato poiščemo še indeks stolpca, ki pripada prvemu None v tej vrstici. Potem poiščemo vse možne kandidate, ki manjkajo v tisti vrstici, stolpcu ter ustrezni škatli. Če jih ni, vrne None, sicer vrne st1, kjer kasneje None nadomestimo z najmanjšim kandidatom, in st2, kjer so našteti preostali kandidati *)
   let trenutno_stanje = state.current_grid in
   let rec poisci_prvo_nepolno_vrstico grid v = (* v = indeks vrstice *)
     match v with
@@ -57,7 +59,7 @@ let branch_state (state : state) : (state * state) option =
     | _ -> failwith "vrstica je polna, napaka v kodi"
   in
   let s = najdi_indeks_stolpca vrstica (if v = state.current_row then state.current_column else 0) in (* dobimo indeks stolpca, torej trenutno_stanje.(v).(s) = None *)
-  (* poiščimo števila, ki manjkajo v vrstici *)
+  (* poiščimo števila, ki manjkajo v vrstici IN stolpcu IN škatli *)
   let rec poisci_manjkajoca_stevila grid v s acc t =
     match t with
     | x when 0 < x && x < 10 ->
@@ -72,7 +74,7 @@ let branch_state (state : state) : (state * state) option =
   let manjkajoca = (poisci_manjkajoca_stevila trenutno_stanje v s [] 1) in
   (* KAJ IMAMO DO SEDAJ: 
   v, s - indeksa prvega zgornjega in levega manjkajočega elementa
-  manjkajoca - seznam manjkajocih stevil v v-ti vrstici, urejen po velikosti   
+  manjkajoca - seznam manjkajocih stevil v v-ti vrstici, s-tem stolpcu in ta pravi škatli; urejen po velikosti   
   *)
   if manjkajoca = [] then None
   else
@@ -99,7 +101,7 @@ let branch_state (state : state) : (state * state) option =
 (* pogledamo, če trenutno stanje vodi do rešitve *)
 let rec solve_state (state : state) =
   (* uveljavimo trenutne omejitve in pogledamo, kam smo prišli *)
-  (* TODO: na tej točki je stanje smiselno počistiti in zožiti možne rešitve *)
+  (* TODO: na tej točki je stanje smiselno počistiti in zožiti možne rešitve - TO SE NAREDI ŽE V BRANCH_STATE:) *)
   match validate_state state with
   | Solved solution ->
       (* če smo našli rešitev, končamo *)
@@ -119,16 +121,16 @@ and explore_state (state : state) =
       None
   | Some (st1, st2) -> (
       (* če stanje lahko razvejimo na dve možnosti, poizkusimo prvo *)
-      st1.current_grid.(st1.current_row).(st1.current_column) <- (Some (List.hd st1.current_element_option));
+      st1.current_grid.(st1.current_row).(st1.current_column) <- (Some (List.hd st1.current_element_option)); (* vstavimo prvega kandidata namesto prvega None *)
       match solve_state st1 with
       | Some solution ->
           (* če prva možnost vodi do rešitve, do nje vodi tudi prvotno stanje *)
           Some solution
       | None ->
           (* če prva možnost ne vodi do rešitve, raziščemo še drugo možnost *)
-          let rec resi st = (* vstavimo prvi naslednji element namesto None in pogledamo, če reši, sicer gremo naprej po seznamu možnosti za tisti elemente grida *)
+          let rec resi st = (* vstavimo prvega naslednjega kandidata namesto None in pogledamo, če to reši sudoku, sicer gremo naprej po seznamu kandidatov za ta None *)
             match st.current_element_option with
-            | [] -> None (* failwith "Nekaj je slo narobe, noben element ne ustreza" *)
+            | [] -> None (* Zmanjkalo kandidatov, ni rešitve *)
             | x::xs ->
               st.current_grid.(st.current_row).(st.current_column) <- (Some x);
               match solve_state st with
