@@ -82,6 +82,12 @@ let get_box (grid : 'a grid) (box_ind : int) =
 let boxes grid = List.init 9 (get_box grid)
 (* vrne seznam z Arrayi posameznih škatel *)
 
+let box_ind ind_v ind_s =
+  (* iz indeksa vrstice (ind_v) in stolpca (ind_s) dobimo indeks škatle *)
+  let skatle = [|[|0;1;2|];[|3;4;5|];[|6;7;8|]|] in
+  let v = (if ind_v < 3 then 0 else if ind_v < 6 then 1 else 2) and
+  s = (if ind_s < 3 then 0 else if ind_s < 6 then 1 else 2)
+  in skatle.(v).(s)
 
 (* Funkcije za ustvarjanje novih mrež *)
 
@@ -145,18 +151,24 @@ type solution = int grid
 let print_solution solution = print_grid Int.to_string solution
 
 let is_valid_solution problem solution =
-  (*
-     - vrne true/false
-     - preveri, ali se številke iz problema ujemajo na mestih iz solution
-     - preveri, ali je solution veljaven 
-     *)
-  let vrstice = rows solution and stolpci = columns solution and skatle = boxes solution in
-  let pravilno_zapolnjen arr =
-    match (List.sort compare (Array.to_list arr)) with
-    | [1;2;3;4;5;6;7;8;9] -> true
-    | _ -> false
-  and f = (function false -> true | _ -> false) in
-  if (List.exists f (List.map pravilno_zapolnjen vrstice) ||
-    List.exists f (List.map pravilno_zapolnjen stolpci) ||
-    List.exists f (List.map pravilno_zapolnjen skatle)) then false
-  else true
+  (* preveri, ali se številke iz problema ujemajo na mestih iz solution *)
+  let rec preveri_sovpadanje grid1 grid2 v s =
+    match v, s with
+    | 9, _ -> true
+    | x, 9 -> preveri_sovpadanje grid1 grid2 (x + 1) 0
+    | x, y when grid1.(x).(y) = None -> preveri_sovpadanje grid1 grid2 x (y + 1)
+    | x, y -> if grid1.(x).(y) = Some (grid2.(x).(y)) then preveri_sovpadanje grid1 grid2 x (y + 1) else false
+  in
+  if preveri_sovpadanje problem.initial_grid solution 0 0 = false then false
+  else
+    (* preveri, ali je solution veljaven *)
+    let vrstice = rows solution and stolpci = columns solution and skatle = boxes solution in
+    let pravilno_zapolnjen arr =
+      match (List.sort compare (Array.to_list arr)) with
+      | [1;2;3;4;5;6;7;8;9] -> true
+      | _ -> false
+    and f = (function false -> true | _ -> false) in
+    if (List.exists f (List.map pravilno_zapolnjen vrstice) ||
+      List.exists f (List.map pravilno_zapolnjen stolpci) ||
+      List.exists f (List.map pravilno_zapolnjen skatle)) then false
+    else true
