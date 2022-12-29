@@ -89,6 +89,7 @@ let box_ind ind_v ind_s =
   s = (if ind_s < 3 then 0 else if ind_s < 6 then 1 else 2)
   in skatle.(v).(s)
 
+  
 (* Funkcije za ustvarjanje novih mrež *)
 
 let map_grid (f : 'a -> 'b) (grid : 'a grid) : 'b grid = Array.init 9 (fun i -> Array.map f (get_row grid i))
