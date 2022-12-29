@@ -43,38 +43,36 @@ let branch_state (state : state) : (state * state) option =
      Če bo vaš algoritem najprej poizkusil prvo možnost, vam morda pri drugi
      za začetek ni treba zapravljati preveč časa, saj ne bo nujno prišla v poštev. *)
   let trenutno_stanje = state.current_grid in
-  let vrstice = Model.rows trenutno_stanje in (* seznam z arrayi vrstic*)
-  let rec poisci_prvo_nepolno_vrstico seznam_vrstic v = (* v = indeks vrstice *)
-    match seznam_vrstic with
-    | x :: xs ->
-      if Array.mem None x then (Array.to_list x, v) (* če vrstica vsebuje None *)
-      else poisci_prvo_nepolno_vrstico xs (v + 1)
+  let rec poisci_prvo_nepolno_vrstico grid v = (* v = indeks vrstice *)
+    match v with
+    | x when x < 10 -> let v_ta_vrstica = Model.get_row grid v in
+      if Array.mem None v_ta_vrstica then (v_ta_vrstica, v) (* če vrstica vsebuje None *)
+      else poisci_prvo_nepolno_vrstico grid (v + 1)
     | _ -> failwith "Sudoku je že rešen??"
   in
-  let vrstica, v = poisci_prvo_nepolno_vrstico vrstice 0 in (* dobimo seznam s prvo nepopolno vrstico ter njen indeks *)
-  let pretvori opt_sez = List.map (function None -> 0 | Some n -> n) opt_sez in
-  let int_vrstica = pretvori vrstica in (* vrstica z option el. je pretvorjena v seznam števil (None pretvorjen v 0) *)
-  let rec najdi_stolpec seznam s =
-    match seznam with
-    | x::xs -> if x = 0 then s else najdi_stolpec xs (s+1)
-    | _ -> failwith "vrstica je polna"
+  let vrstica, v = poisci_prvo_nepolno_vrstico trenutno_stanje state.current_row in (* dobimo array s prvo nepopolno vrstico ter njen indeks *)
+  let rec najdi_indeks_stolpca vrstica s =
+    match s with
+    | x when x < 10 -> if vrstica.(x) = None then s else najdi_indeks_stolpca vrstica (s + 1)
+    | _ -> failwith "vrstica je polna, napaka v kodi"
   in
-  let s = najdi_stolpec int_vrstica 0 in (* dobimo indeks stolpca, torej trenutno_stanje.(v).(s) = None *)
+  let s = najdi_indeks_stolpca vrstica (if v = state.current_row then state.current_column else 0) in (* dobimo indeks stolpca, torej trenutno_stanje.(v).(s) = None *)
   (* poiščimo števila, ki manjkajo v vrstici *)
-  let rec poisci_manjkajoca_stevila seznam acc t =
+  let rec poisci_manjkajoca_stevila grid v s acc t =
     match t with
     | x when 0 < x && x < 10 ->
-      if List.mem x seznam then poisci_manjkajoca_stevila seznam acc (t + 1)
-      else poisci_manjkajoca_stevila seznam (x::acc) (t + 1)
+      if
+        Array.mem (Some x) (Model.get_row grid v) || (* če je element vsebovan v vrstici/stolpcu/škatli, gremo naprej *)
+        Array.mem (Some x) (Model.get_column grid s) ||
+        Array.mem (Some x) (Model.get_box grid (Model.box_ind v s))
+        then poisci_manjkajoca_stevila grid v s acc (t + 1)
+      else poisci_manjkajoca_stevila grid v s (x::acc) (t + 1)
     | _ -> List.rev acc
   in
-  let manjkajoca = (poisci_manjkajoca_stevila int_vrstica [] 1) in (* dobimo seznam manjkajocih stevil v vrstici, urejena po velikosti *)
-
-  (* TU LAHKO DODAŠ, da vzameš seznam števil, ki ne manjkajo le v vrstici, ampak tudi v tem stolpcu in tej škatli, torej še krajši seznam. Če je seznam prazen, je to fail in vrneš None. S tem bo veliko manj možnosti za pogledat in manj zahtevno *)
-
+  let manjkajoca = (poisci_manjkajoca_stevila trenutno_stanje v s [] 1) in
   (* KAJ IMAMO DO SEDAJ: 
   v, s - indeksa prvega zgornjega in levega manjkajočega elementa
-  manjkajoca - seznam manjkajocih stevil v v-ti vrstici   
+  manjkajoca - seznam manjkajocih stevil v v-ti vrstici, urejen po velikosti   
   *)
   if manjkajoca = [] then None
   else
@@ -86,6 +84,8 @@ let branch_state (state : state) : (state * state) option =
       current_column = s;
       current_element_option = [prvi]
     }
+    (* st1 je del, kjer namesto prvega None elementa (v explore_state) zapišemo prvo trenutno legalno število;
+       st2 vsebuje ostale možnosti *)
     and st2 = {
       problem = state.problem;
       current_grid = Model.copy_grid trenutno_stanje;
