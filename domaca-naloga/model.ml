@@ -144,4 +144,19 @@ type solution = int grid
 
 let print_solution solution = print_grid Int.to_string solution
 
-let is_valid_solution problem solution = (* failwith "TODO" NAPIŠI pravilno kodo! *) true
+let is_valid_solution problem solution =
+  (*
+     - vrne true/false
+     - preveri, ali se številke iz problema ujemajo na mestih iz solution
+     - preveri, ali je solution veljaven 
+     *)
+  let vrstice = rows solution and stolpci = columns solution and skatle = boxes solution in
+  let pravilno_zapolnjen arr =
+    match (List.sort compare (Array.to_list arr)) with
+    | [1;2;3;4;5;6;7;8;9] -> true
+    | _ -> false
+  and f = (function false -> true | _ -> false) in
+  if (List.exists f (List.map pravilno_zapolnjen vrstice) ||
+    List.exists f (List.map pravilno_zapolnjen stolpci) ||
+    List.exists f (List.map pravilno_zapolnjen skatle)) then false
+  else true
