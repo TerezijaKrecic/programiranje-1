@@ -234,7 +234,9 @@ let rec find_candidate magic specialisation wizard_list =
        in
        match wizard_list with
        | [] -> None
-       | {name; status = Student (mag, leta)} :: wizardlist -> if (mag = magic && leta >= omejitev) then Some name else find_candidate magic specialisation wizardlist
+       | {name; status = Student (mag, leta)} :: wizardlist ->
+              if (mag = magic && leta >= omejitev) then Some name
+              else find_candidate magic specialisation wizardlist
        | _ :: wizardlist -> find_candidate magic specialisation wizardlist
 
 (*

@@ -21,9 +21,7 @@ let rec reverse =
 
 let repeat x n =
   let rec repeat_aux acc y m =
-    if m <= 0 then [] else
-      (if m == 0 then acc
-       else repeat_aux (y::acc) y (m-1))
+    if m <= 0 then acc else repeat_aux (y::acc) y (m-1)
   in
   repeat_aux [] x n
 
@@ -224,18 +222,17 @@ let rec fold_left_no_acc f =
  vrednosti [x] do vključno [n]-te uporabe, torej
  [x; f x; f (f x); ...; (f uporabljena n-krat na x)].
 Funkcija je repno rekurzivna.
-                    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                    # apply_sequence (fun x -> x * x) 2 5;;
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# apply_sequence (fun x -> x * x) 2 5;;
 - : int list = [2; 4; 16; 256; 65536; 4294967296]
-               # apply_sequence (fun x -> x * x) 2 (-5);;
+# apply_sequence (fun x -> x * x) 2 (-5);;
 - : int list = []
-  [*----------------------------------------------------------------------------*)
+[*----------------------------------------------------------------------------*)
 
 let apply_sequence f x n =
-  if n <= 0 then [] else
   let rec apply_sequence_aux acc y m =
     match m with
-    | 0 -> reverse acc
+    | x when x <= 0 -> reverse acc
     | _ -> apply_sequence_aux ((f y) :: acc) (f y) (m - 1)
   in
   apply_sequence_aux [] x n
@@ -269,10 +266,14 @@ let filter f sez =
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let exists f sez =
+(* let exists f sez =
   match filter f sez with
   | [] -> false
-  | _ -> true
+  | _ -> true *)
+
+let rec exists f sez = match sez with
+  | [] -> false
+  | x :: xs -> if f x = true then true else exists f xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [first f default list] vrne prvi element seznama, za katerega

@@ -154,8 +154,7 @@ let swap a i j =
 let rec index_min a lower upper =
   let rec index_min_aux a m lower upper =
     if lower = upper then
-      if a.(m) <=
-         a.(upper) then m else upper
+      if a.(m) <= a.(upper) then m else upper
     else
       if a.(m) <= a.(lower) then index_min_aux a m (lower+1) upper
       else index_min_aux a lower (lower+1) upper

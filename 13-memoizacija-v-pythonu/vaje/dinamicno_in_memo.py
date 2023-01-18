@@ -10,13 +10,51 @@ from functools import cache
 # Primer: v seznamu `[2, 3, 6, 8, 4, 4, 6, 7, 12, 8, 9]` kot rezultat vrne
 # podzaporedje `[2, 3, 4, 4, 6, 7, 8, 9]`.
 # -----------------------------------------------------------------------------
+def najdaljse_narascajoce_podzaporedje(seznam):
+    @cache
+    def narascajoce_zaporedje(spodnjameja, i): # i = index
+        if i >= len(seznam):
+            return []
+        elif seznam[i] < spodnjameja:
+            return narascajoce_zaporedje(spodnjameja, i + 1)
+        else:
+            s_prvim = [seznam[i]] + narascajoce_zaporedje(seznam[i], i + 1)
+            brez_prvega = narascajoce_zaporedje(spodnjameja, i + 1)
+            if len(s_prvim) > len(brez_prvega):
+                return s_prvim
+            else:
+                return brez_prvega
+    return narascajoce_zaporedje(float("-inf"), 0)
+    
+
+# print(najdaljse_narascajoce_podzaporedje([2, 3, 6, 8, 4, 4, 6, 7, 12, 8, 9]))
 
 # -----------------------------------------------------------------------------
 # Rešitev sedaj popravite tako, da funkcija `vsa_najdaljsa` vrne seznam vseh
 # najdaljših naraščajočih podzaporedij.
 # -----------------------------------------------------------------------------
 
+def vsa_najdaljsa(seznam):
+    @cache
+    def narascajoce_zaporedje(spodnjameja, i):
+        if i >= len(seznam):
+            return (0, [[]])
+        elif seznam[i] < spodnjameja:
+            return narascajoce_zaporedje(spodnjameja, i + 1)
+        else:
+            dolzina_s_prvim, sez_s_prvim = narascajoce_zaporedje(seznam[i], i + 1)
+            dolzina_s_prvim += 1
+            dolzina_brez_prvega, sez_brez_prvega = narascajoce_zaporedje(spodnjameja, i + 1)
+            if dolzina_s_prvim > dolzina_brez_prvega:
+                return (dolzina_s_prvim, [[seznam[i]] + zap for zap in sez_s_prvim])
+            elif dolzina_s_prvim == dolzina_brez_prvega:
+                return (dolzina_s_prvim, [[seznam[i]] + zap for zap in sez_s_prvim] + sez_brez_prvega)
+            else:
+                return (dolzina_brez_prvega, sez_brez_prvega)
+    return narascajoce_zaporedje(float("-inf"), 0)[1]
 
+# print(vsa_najdaljsa([2, 3, 6, 8, 4, 4, 6, 7, 12, 8, 9]))
+# print(vsa_najdaljsa([2, 3, 6, 8, 4, 6, 7, 12, 8, 9]))
 
 # =============================================================================
 # Žabica
@@ -42,8 +80,21 @@ from functools import cache
 # treh skokih, v močvari `[4, 1, 8, 2, 11, 1, 1, 1, 1, 1]` pa potrebuje zgolj
 # dva.
 # =============================================================================
+def zabica(mocvara):
+    @cache
+    def skok(e, trenutno_mesto, skoki):
+        # e = koliko energije ima (v to še NI všteta energija na i-tem mestu!!!)
+        # trenutno_mesto = kje se nahaja
+        # skoki = število skokov
+        if trenutno_mesto >= len(mocvara):
+            return skoki
+        else:
+            e += mocvara[trenutno_mesto]
+            return min([skok(e - i, trenutno_mesto + i, skoki + 1) for i in range(1, e + 1)])
+    return skok(0, 0, 0)
 
-
+# print(zabica([2, 4, 1, 2, 1, 3, 1, 1, 5]))
+# print(zabica([4, 1, 8, 2, 11, 1, 1, 1, 1, 1]))
 
 # =============================================================================
 # Nageljni
@@ -65,8 +116,48 @@ from functools import cache
 #     [1, 1, 0, 0, 1, 1, 0, 1, 1]
 #     [0, 1, 1, 0, 1, 1, 0, 1, 1]
 # =============================================================================
+def nageljni(n, m, l):
+    # n - širina balkona
+    # m - število korit
+    # l - širina korita
+    def del_balkona(trenutno_prosto_mesto, st_manjkajocih_korit):
+        # na trenutno mesto (indeks) že lahko postavimo (ali ne postavimo) novo korito
+        if st_manjkajocih_korit == 0: # če zmanjka korit -> dodamo samo še seznam ničel
+            return [[0 for i in range(max(n - trenutno_prosto_mesto, 0))]]
+        elif trenutno_prosto_mesto + l > n: # novo korito bi seglo čez rob balkona, hkrati pa ga moramo nekam dat 
+            return [[]]
+        elif trenutno_prosto_mesto + l == n: # robni primer, ko korito damo do roba balkona
+            return [[1 for i in range(l)]]
+        else:
+            prvi_s_koritom = [([1 for i in range(l)] + [0] + postavitev) for postavitev in del_balkona(trenutno_prosto_mesto + l + 1, st_manjkajocih_korit - 1)] # na trenutno mesto damo korito
+            prvi_brez_korita = [([0] + postavitev) for postavitev in del_balkona(trenutno_prosto_mesto + 1, st_manjkajocih_korit)] # na trenutno mesto ne postavimo korita
+            vsi_pravi = []
+            for sez in prvi_s_koritom + prvi_brez_korita:
+                if len(sez) == (n - trenutno_prosto_mesto) and sez.count(1) == 2 * st_manjkajocih_korit:
+                    vsi_pravi.append(sez)
+            return vsi_pravi
+    return del_balkona(0, m)
 
+print(nageljni(9,3,2))
 
+# REŠITVE
+# @cache
+# def nageljni(n, m, l):
+#     if m <= 0:
+#         return [[0 for _ in range(n)]]
+#     elif n < l:
+#         return []
+#     elif n == l and m == 1:
+#         # zapolnimo do potankosti
+#         # dodan kot robni primer, da lahko v naslednji opciji vedno dodamo 0
+#         # na desno stran korita
+#         return [[1 for _ in range(n)]]
+#     else:
+#         ne_postavimo = [[0] + postavitev for postavitev in nageljni(n-1, m, l)]
+#         postavimo = \
+#             [[1 for _ in range(l)] + [0] + postavitev
+#              for postavitev in nageljni(n-l-1, m-1, l)]
+#         return postavimo + ne_postavimo
 
 # =============================================================================
 # Pobeg iz Finske

@@ -269,6 +269,14 @@ let test_dict = Sestavljeno {
  - : int option = Some (-2)
 [*----------------------------------------------------------------------------*)
 
+(* NE DELA! *)
+let rec dict_get key dict = match dict with
+     | Prazno -> Some None
+     | Sestavljeno {levo; vrednost = (kljuc, vr); desno} ->
+          if kljuc = key then vr
+          else let a = dict_get key levo in
+               if a = Some None then dict_get key desno
+               else a
       
 (*----------------------------------------------------------------------------*]
  Funkcija [print_dict] sprejme slovar s ključi tipa [string] in vrednostmi tipa

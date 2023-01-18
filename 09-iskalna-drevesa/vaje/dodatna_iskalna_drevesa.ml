@@ -1,6 +1,14 @@
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  DODATNE VAJE 
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
+type 'a drevo =
+     | Prazno
+     | Sestavljeno of {
+          levo: 'a drevo;
+          vrednost: 'a;
+          desno: 'a drevo;
+     }
+let leaf x = Sestavljeno {levo=Prazno; vrednost=x; desno=Prazno}
 
 (*----------------------------------------------------------------------------*]
  Funkcija [bst_of_list] iz seznama naredi dvojiško iskalno drevo.
@@ -8,6 +16,10 @@
  # [11; 6; 7; 0; 2; 5] |> bst_of_list |> is_bst;;
  - : bool = true
 [*----------------------------------------------------------------------------*)
+let bst_of_list sez =
+  let rec bst_of_list drevo = function
+    | [] -> drevo
+    | 
 
 
 (*----------------------------------------------------------------------------*]

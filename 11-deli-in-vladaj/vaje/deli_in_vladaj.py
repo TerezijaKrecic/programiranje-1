@@ -131,6 +131,7 @@ def pivot(a, start, end):
 
 a = [10, 4, 5, 15, 11, 2, 17, 0, 18]
 # print(pivot(a, 1, 7))
+# print(a)
 
 ###############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
@@ -153,6 +154,7 @@ def kth_element(a, k):
         s = pivot(b,0,len(b)-1)
         if s == k:
             return pivott
+    return "Ni takega elementa"
 
 a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
 # print(kth_element(a,3))
@@ -194,4 +196,4 @@ def quicksort(a):
 
 
 a = [10, 4, 5, 15, 11, 3, 17, 2, 18]
-print(quicksort(a))
+# print(quicksort(a))
