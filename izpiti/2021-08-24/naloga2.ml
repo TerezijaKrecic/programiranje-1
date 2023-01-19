@@ -47,6 +47,16 @@ let primer =
   Napišite funkcijo `prestej : izraz -> int`, ki vrne število vseh "različnih" 
   spremenljivk v izrazu.
 [*----------------------------------------------------------------------------*)
+let prestej (izraz : 'a izraz) =
+  let sez = ref [] in
+  let rec aux izr = match izr with
+    | Spremenljivka x ->
+        if List.mem x !sez then List.length !sez
+        else sez := x :: !sez; List.length !sez
+    | Konstanta _ -> List.length !sez
+    | Operacija (lizr, _, dizr) -> aux lizr + aux dizr
+  in
+  aux izraz
 
 (* b *)
 (*----------------------------------------------------------------------------*]
@@ -54,6 +64,17 @@ Napišite funkcijo `izlusci : 'a izraz -> (string * int) slovar`, ki sprejme izr
 in vrne slovar, ki pove, kolikokrat se posamezna spremenljivka pojavi v izrazu. 
 Vrstni red v slovarju ni pomemben.
 [*----------------------------------------------------------------------------*)
+let izlusci (izraz : 'a izraz) =
+  let slovar = ref prazen_slovar in
+  let rec aux izr = match izr with
+    | Spremenljivka x ->
+        if vsebuje x !slovar then (let v = najdi x !slovar in slovar = dodaj (x, v + 1) !slovar)
+        else slovar = dodaj (x, 1) !slovar
+    | Konstanta _ -> ()
+    | Operacija (lizr, _, dizr) -> aux lizr; aux dizr
+  in
+  aux izraz;
+  slovar
 
 (* c *)
 (*----------------------------------------------------------------------------*]

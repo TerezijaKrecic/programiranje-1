@@ -3,7 +3,7 @@
   Napišite predikat `je_urejena : int * int * int -> bool`, ki pove, ali je 
   podana trojica celih števil urejena strogo naraščajoče.
 [*----------------------------------------------------------------------------*)
-
+let je_urejena (a,b,c) = a < b && b < c
 (* b *)
 (*----------------------------------------------------------------------------*]
   Napišite funkcijo `poskusi_deljenje : float option -> float option -> float option`, 
@@ -18,7 +18,9 @@
     # poskusi_deljenje None (Some 2.0);;
     - : float option = None
 [*----------------------------------------------------------------------------*)
-
+let poskusi_deljenje a b = match a, b with
+  | None, _ | _, None -> None
+  | Some x, Some y -> if y = 0. then None else Some (x /. y)
 (* c *)
 (*----------------------------------------------------------------------------*]
   Definirajte funkcijo `zavrti : 'a list -> int -> 'a list`, ki seznam zavrti 
@@ -28,7 +30,12 @@
     # zavrti [1; 2; 3; 4; 5] 2;;
     - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
-
+let rec zavrti seznam a = match seznam with
+  | [] -> []
+  | x :: xs -> match a with
+    | 0 -> x :: xs
+    | b -> zavrti (xs @ [x]) (b - 1)
+  
 (* d *)
 (*----------------------------------------------------------------------------*]
   Napišite funkcijo `razdeli : ('a -> int) -> 'a list -> ('a list *  'a list * 'a list)|`, 
@@ -41,3 +48,12 @@
     # razdeli ((-) 3) [1; 2; 3; 4; 5; 6];;
     - : int list * int list * int list = ([4; 5; 6], [3], [1; 2])
 [*----------------------------------------------------------------------------*)
+let razdeli f seznam =
+  let rec aux neg nic poz = function
+    | [] -> (List.rev neg, List.rev nic, List.rev poz)
+    | x :: xs ->
+      if f x < 0 then aux (x :: neg) nic poz xs
+      else if f x = 0 then aux neg (x :: nic) poz xs
+      else aux neg nic (x :: poz) xs
+  in
+  aux [] [] [] seznam
